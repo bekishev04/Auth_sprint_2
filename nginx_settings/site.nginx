@@ -1,0 +1,10 @@
+server {
+    listen       80 default_server;
+    listen       [::]:80 default_server;
+    server_name  _;
+
+    location /api {
+        proxy_pass http://authservice_api:8000;
+    }
+
+}

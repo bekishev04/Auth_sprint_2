@@ -1,0 +1,34 @@
+.idea
+*.py[cod]
+.vscode
+__pycache__
+.mypy_cache
+
+# SQLite databases
+*.sqlite
+
+# Virtual environment
+env/*
+.env
+venv/*
+*/env
+
+*/.venv/*
+*/.venv
+*/.env
+
+
+*.DS_Store
+.DS_Store
+
+# config (style code)
+.editorconfig
+docker-volumes/*
+
+*.log
+*.lock
+*.puml
+*.sql
+pyrightconfig.json
+
+poetry.lock

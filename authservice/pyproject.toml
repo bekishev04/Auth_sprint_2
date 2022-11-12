@@ -1,0 +1,57 @@
+[tool.poetry]
+name = "authservice"
+version = "0.1.0"
+description = ""
+authors = ["Matvei Bekishev <bekishev04@yandex.ru>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+Flask = "^2.2.2"
+Flask-Cors = "^3.0.10"
+flask-sqlalchemy = "^3.0.2"
+sqlalchemy = {extras = ["mypy"], version = "^1.4.41"}
+psycopg2 = "^2.9.3"
+loguru = "^0.6.0"
+pydantic = {extras = ["mypy"], version = "^1.10.2"}
+Flask-Migrate = "^3.0.1"
+Flask-Login = "^0.6.0"
+python-dotenv = "^0.21.0"
+dateparser = "^1.1.1"
+gunicorn = "^20.1.0"
+spectree = "^0.11.0"
+
+[tool.poetry.scripts]
+local_up = "manage:local_up"
+local_down = "manage:local_down"
+create_user = "manage:create_user"
+
+[tool.poetry.group.dev.dependencies]
+docker = "^6.0.0"
+pytest = "^7.1.3"
+black = "22.10.0"
+mypy = "^0.982"
+faker = "^15.1.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 79
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | \.env
+  | _build
+  | buck-out
+  | build
+  | dist
+  | tests/.*/setup.py
+)/
+'''

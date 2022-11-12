@@ -1,0 +1,35 @@
+version: "3.7"
+services:
+  authservice_api:
+    container_name: ${BACKEND_CONTAINER_NAME}
+    build: authservice
+    image: ${BACKEND_CONTAINER_NAME}:latest
+    expose:
+      - "${BACKEND_API_PORT}:5000"
+    env_file:
+      - ./${PROJECT_DIR}/.env
+    volumes:
+      - ./${PROJECT_DIR}:/home/${PROJECT_DIR}
+    deploy:
+      replicas: 1
+  authservice_db:
+    container_name: ${DB_CONTAINER_NAME}
+    image: postgres:13.3
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data
+      POSTGRES_DB: postgres
+    volumes:
+      - ./docker-volumes/postgres/:/var/lib/postgresql/data
+    expose:
+      - "${DB_CONTAINER_PORT}:5432"
+    deploy:
+      replicas: 1
+  nginx:
+    build: nginx_settings
+    ports:
+      - 80:80
+    depends_on:
+      - authservice_api
