@@ -25,7 +25,7 @@ def local_up() -> None:
 
     if args.db and args.db in ("up", "down"):
         os.system(
-            "docker-compose -f ../docker-compose.yml %s %s authservice_db"
+            "docker-compose -f ../docker-compose.dev.yml %s %s"
             % (args.db, "-d" if args.db == "up" else "")
         )
 
