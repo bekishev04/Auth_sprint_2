@@ -34,4 +34,6 @@ http {
   proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
 
   include conf.d/*.conf;
+
+  limit_req_zone $request_uri zone=one:10m rate=1r/s;
 }

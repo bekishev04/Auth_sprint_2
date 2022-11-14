@@ -4,6 +4,7 @@ server {
     server_name  _;
 
     location /api {
+        limit_req zone=one burst=5;
         proxy_pass http://authservice_api:8000;
     }
 
