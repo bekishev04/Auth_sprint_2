@@ -3,6 +3,7 @@ import argparse
 import os
 
 from loguru import logger
+from werkzeug.security import generate_password_hash
 
 from authservice import create_app
 from authservice.database import db, models
@@ -36,7 +37,7 @@ def local_up() -> None:
 def local_down() -> None:
     """Функция для остановки локальной базой данных"""
 
-    os.system("docker-compose -f ../docker-compose.yml down")
+    os.system("docker-compose -f ../docker-compose.dev.yml down")
 
 
 def create_user() -> None:
@@ -71,7 +72,7 @@ def create_user() -> None:
     with app.app_context():
         user = models.User(
             login=args.login,
-            password=args.password,
+            password=generate_password_hash(args.password),
             role=args.role,
             full_name=args.full_name,
         )

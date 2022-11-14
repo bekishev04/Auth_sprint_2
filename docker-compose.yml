@@ -33,3 +33,7 @@ services:
       - 80:80
     depends_on:
       - authservice_api
+  jaegertracingservice:
+    image: jaegertracing/all-in-one:latest
+    expose:
+      - "${JT_CONTAINER_PORT}:16686"

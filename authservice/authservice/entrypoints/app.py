@@ -75,6 +75,8 @@ def create_app() -> Flask:
                 request_id = uuid.UUID(h_request_id)
             except (ValueError, TypeError):
                 pass
+        # else:
+        #     raise RuntimeError('request id is required')
 
         g.version = version
         g.request_id = request_id

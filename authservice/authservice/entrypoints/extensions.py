@@ -11,7 +11,9 @@ from spectree.models import (
     SecuritySchemeData,
     SecureType,
 )
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
 
+from .jaegerexporter import configure_tracer
 from ..config import cfg
 from ..database import db, migrate
 
@@ -63,6 +65,10 @@ def init_extensions(app: Flask) -> Flask:
 
     # docs
     spec_tree.register(app)
+
+    # jaeger
+    configure_tracer()
+    FlaskInstrumentor().instrument_app(app)
 
     return app
 

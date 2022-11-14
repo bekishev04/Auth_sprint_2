@@ -38,6 +38,8 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_TTL: int = 20160  # two weeks
     ACCESS_TOKEN_TTL: int = 60
 
+    JAEGER_PORT: int
+
 
 cfg = Settings()
 

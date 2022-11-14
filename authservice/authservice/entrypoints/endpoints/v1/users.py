@@ -57,6 +57,10 @@ class UserLoginApi(MethodView):
 
         with self._uow:
             row = self._uow.users.get_by(login=json.login)
+
+            if not row:
+                abort(http.HTTPStatus.NOT_FOUND)
+
         if check_password_hash(row.password, json.password):
             access_token, refresh_token = self.token_manager.get_token_pair(
                 row.id

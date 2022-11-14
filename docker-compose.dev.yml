@@ -15,3 +15,8 @@ services:
       - "${DB_CONTAINER_PORT}:5432"
     deploy:
       replicas: 1
+  jaegertracingservice:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "6831:6831/udp"
+      - "${JT_CONTAINER_PORT}:16686"
