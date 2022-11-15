@@ -4,6 +4,7 @@ import uuid
 from authservice.database import db
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
+from sqlalchemy import UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 
 
@@ -74,3 +75,26 @@ class Session(BaseModel):
             return False
         else:
             return bool(self.expired_at < datetime.datetime.now())
+
+
+class LoginHistory(BaseModel):
+    __tablename__ = "login_history"
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'logged_in_at'),
+        {
+            'postgresql_partition_by': 'RANGE (logged_in_at)',
+        }
+    )
+
+    user_id = sa.Column(
+        UUID(as_uuid=True),
+        sa.ForeignKey("users.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    logged_in_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, primary_key=True)
+    user_agent = db.Column(db.Text)
+
+    def __repr__(self):
+        return f'<UserSignIn {self.user_id}:{self.logged_in_at}>'
