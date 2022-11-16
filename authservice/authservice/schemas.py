@@ -117,6 +117,7 @@ class ReqLogin(BaseModel):
 
     login: str
     password: str
+    user_agent: str | None
 
 
 class ReqRefreshToken(BaseModel):
