@@ -65,6 +65,15 @@ class UserLoginApi(MethodView):
             access_token, refresh_token = self.token_manager.get_token_pair(
                 row.id
             )
+            with self._uow:
+                row = models.LoginHistory(
+                    user_id=row.id,
+                    user_agent=json.user_agent
+                )
+
+                self._uow.login_history.add(row)
+                self._uow.commit()
+
             schema = schemas.RespLogon(
                 id=row.id,
                 access_token=access_token,
