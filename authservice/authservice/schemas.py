@@ -145,3 +145,19 @@ class ItemsSession(BaseModel):
 
     total: int = 0
     items: List[ItemSession]
+
+
+class RespHistory(BaseModelSchema):
+    user_id: uuid.UUID
+    logged_in_at: datetime.datetime
+    user_agent: str
+
+
+class RespHistoryItems(BaseModel):
+    items: List[RespHistory]
+
+
+class ReqHistory(BaseModel):
+    user_id: uuid.UUID | None
+    before: datetime.datetime | None
+    after: datetime.datetime | None
