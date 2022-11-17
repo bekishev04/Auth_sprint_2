@@ -260,11 +260,8 @@ class UserHistoryApi(MethodView):
         tags=[TAG + "History"]
     )
     def get(self, query: schemas.ReqHistory):
-        if query.user_id and (query.user_id != g.current_user.id and g.current_user.role != enums.UserRole.ADMIN):
-            abort(http.HTTPStatus.UNAUTHORIZED)
-        user_id, before, after = query.user_id if query.user_id else g.current_user.id, query.before, query.after
         with self._uow:
-            rows = self._uow.login_history.fetch_by(user_id=user_id, before=before, after=after)
+            rows = self._uow.login_history.fetch_by(query, user_id=g.current_user.user_id)
         return schemas.RespHistoryItems(items=rows)
 
 

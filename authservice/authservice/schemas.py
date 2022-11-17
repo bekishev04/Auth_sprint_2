@@ -112,6 +112,11 @@ class ArgsUser(ArgsPaginate):
     login: str | None
 
 
+class ArgsHistory(ArgsPaginate):
+    before: datetime.datetime | None
+    after: datetime.datetime | None
+
+
 class ReqLogin(BaseModel):
     """Req for login"""
 
@@ -159,6 +164,5 @@ class RespHistoryItems(BaseModel):
 
 
 class ReqHistory(BaseModel):
-    user_id: uuid.UUID | None
     before: datetime.datetime | None
     after: datetime.datetime | None
