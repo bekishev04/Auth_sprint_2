@@ -14,7 +14,7 @@ services:
       replicas: 1
   authservice_db:
     container_name: ${DB_CONTAINER_NAME}
-    image: postgres:13.3
+    build: ./postgres_partman_cron
     restart: always
     environment:
       POSTGRES_USER: postgres

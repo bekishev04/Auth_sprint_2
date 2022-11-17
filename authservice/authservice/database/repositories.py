@@ -151,3 +151,20 @@ class TokenRepository(BaseRepo):
         sql = self.session.execute(sa.select(models.Session).where(where))
         row = sql.scalar()
         return row
+
+
+@reg_repo.register("login_history")
+class HistoryRepository(BaseRepo):
+    _model = models.LoginHistory
+
+    def find_by(self, query: schemas.ArgsHistory, *, user_id=None):
+        where = sa.true()
+        if user_id:
+            where &= models.LoginHistory.user_id == user_id
+        if query.after:
+            where &= models.LoginHistory.logged_in_at > query.after
+        if query.before:
+            where &= models.LoginHistory.logged_in_at < query.before
+        sql = self.session.execute(sa.select(models.LoginHistory).where(where))
+        rows = sql.scalars().all()
+        return rows

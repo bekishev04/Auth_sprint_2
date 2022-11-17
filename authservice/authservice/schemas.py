@@ -112,11 +112,17 @@ class ArgsUser(ArgsPaginate):
     login: str | None
 
 
+class ArgsHistory(ArgsPaginate):
+    before: datetime.datetime | None
+    after: datetime.datetime | None
+
+
 class ReqLogin(BaseModel):
     """Req for login"""
 
     login: str
     password: str
+    user_agent: str | None
 
 
 class ReqRefreshToken(BaseModel):
@@ -145,3 +151,18 @@ class ItemsSession(BaseModel):
 
     total: int = 0
     items: List[ItemSession]
+
+
+class RespHistory(BaseModelSchema):
+    user_id: uuid.UUID
+    logged_in_at: datetime.datetime
+    user_agent: str
+
+
+class RespHistoryItems(BaseModel):
+    items: List[RespHistory]
+
+
+class ReqHistory(BaseModel):
+    before: datetime.datetime | None
+    after: datetime.datetime | None

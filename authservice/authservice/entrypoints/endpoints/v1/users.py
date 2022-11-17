@@ -65,6 +65,15 @@ class UserLoginApi(MethodView):
             access_token, refresh_token = self.token_manager.get_token_pair(
                 row.id
             )
+            with self._uow:
+                row = models.LoginHistory(
+                    user_id=row.id,
+                    user_agent=json.user_agent
+                )
+
+                self._uow.login_history.add(row)
+                self._uow.commit()
+
             schema = schemas.RespLogon(
                 id=row.id,
                 access_token=access_token,
@@ -243,6 +252,19 @@ class UserApi(MethodView):
         return schema, http.HTTPStatus.OK
 
 
+class UserHistoryApi(MethodView):
+    decorators = [login_required]
+
+    @spec_tree.validate(
+        resp=Response("HTTP_401", "HTTP_404", HTTP_200=schemas.RespHistoryItems),
+        tags=[TAG + "History"]
+    )
+    def get(self, query: schemas.ReqHistory):
+        with self._uow:
+            rows = self._uow.login_history.fetch_by(query, user_id=g.current_user.user_id)
+        return schemas.RespHistoryItems(items=rows)
+
+
 class UserPasswordEditApi(MethodView):
     """Edit Password Endpoint"""
 
@@ -394,4 +416,10 @@ bp.add_url_rule(
     "/sessions/<uuid:id>/deactivate",
     view_func=UserSessionsApi.as_view("session_deactivate"),
     methods=["PUT"]
+)
+
+bp.add_url_rule(
+    "/login_history",
+    view_func=UserHistoryApi.as_view("login_history"),
+    methods=["GET"]
 )
