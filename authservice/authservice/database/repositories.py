@@ -157,14 +157,44 @@ class TokenRepository(BaseRepo):
 class HistoryRepository(BaseRepo):
     _model = models.LoginHistory
 
-    def find_by(self, query: schemas.ArgsHistory, *, user_id=None):
+    def find_by(self, query: schemas.BaseModel):
+        pass
+
+    def fetch_by(
+            self,
+            *,
+            user_id: uuid.UUID = None,
+            after: datetime.datetime = None,
+            before: datetime.datetime = None,
+    ):
         where = sa.true()
+
         if user_id:
             where &= models.LoginHistory.user_id == user_id
-        if query.after:
-            where &= models.LoginHistory.logged_in_at > query.after
-        if query.before:
-            where &= models.LoginHistory.logged_in_at < query.before
+
+        if after:
+            where &= models.LoginHistory.logged_in_at > after
+
+        if before:
+            where &= models.LoginHistory.logged_in_at < before
+
         sql = self.session.execute(sa.select(models.LoginHistory).where(where))
         rows = sql.scalars().all()
+
         return rows
+
+
+@reg_repo.register("oauth_users")
+class OAuthAccountsRepository(BaseRepo):
+    def find_by(self, query: schemas.BaseModel):
+        pass
+
+    _model = models.OAuthAccounts
+
+    def get_by(self, *, remote_user_id: str):
+        where = sa.true()
+        if remote_user_id:
+            where &= models.OAuthAccounts.service_user_id == remote_user_id
+        sql = self.session.execute(sa.select(models.OAuthAccounts).where(where))
+        row = sql.scalar()
+        return row

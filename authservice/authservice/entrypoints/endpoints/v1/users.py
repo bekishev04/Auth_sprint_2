@@ -1,7 +1,11 @@
 import http
+import secrets
+import string
 import uuid
 
-from authservice import schemas
+import requests
+
+from authservice import schemas, cfg
 from authservice.database import models
 from flask import Blueprint, abort, g
 from spectree import Response
@@ -68,7 +72,7 @@ class UserLoginApi(MethodView):
             with self._uow:
                 row = models.LoginHistory(
                     user_id=row.id,
-                    user_agent=json.user_agent
+                    user_agent=g.user_agent
                 )
 
                 self._uow.login_history.add(row)
@@ -82,6 +86,68 @@ class UserLoginApi(MethodView):
             return schema, http.HTTPStatus.OK
         else:
             abort(http.HTTPStatus.UNAUTHORIZED)
+
+
+class UserOAuthVKApi(MethodView):
+
+    @spec_tree.validate(
+        resp=Response("HTTP_400", "HTTP_401", HTTP_200=schemas.RespLogonOAuth),
+        tags=[TAG + "UsersOAuthVK"],
+    )
+    def get(self, query: schemas.ReqOAuthVK):
+        if not query.code:
+            abort(http.HTTPStatus.BAD_REQUEST)
+        link = 'https://oauth.vk.com/access_token'
+        params = {'client_id': cfg.VK_APP_ID,
+                  'client_secret': cfg.VK_CLIENT_SECRET,
+                  'redirect_uri': cfg.VK_REDIRECT_URI,
+                  'code': query.code}
+        resp = requests.get(link, params=params)
+        json = resp.json()
+        if json.get('error', None):
+            abort(http.HTTPStatus.BAD_REQUEST)
+        vk_user_id = str(json.get('user_id', None))
+        user_email = json.get('email', None)
+        with self._uow:
+            remote_user = self._uow.oauth_users.get_by(remote_user_id=vk_user_id)
+            if remote_user:
+                access_token, refresh_token = self.token_manager.get_token_pair(
+                    remote_user.user_id
+                )
+
+                history_row = models.LoginHistory(
+                    user_id=remote_user.user_id,
+                    user_agent=g.user_agent
+                )
+
+                self._uow.login_history.add(history_row)
+                self._uow.commit()
+                return schemas.RespLogonOAuth(access_token=access_token,
+                                              refresh_token=refresh_token,
+                                              message='user found')
+            else:
+                alphabet = string.ascii_letters + string.digits
+                random_password = ''.join(secrets.choice(alphabet) for _ in range(20))
+                row = models.User(
+                    login=user_email,
+                    role=enums.UserRole.USER,
+                    password=generate_password_hash(random_password)
+                )
+                self._uow.users.add(row)
+                self._uow.commit()
+                oauth_user = models.OAuthAccounts(
+                    user_id=row.id,
+                    service_user_id=vk_user_id
+                )
+
+                access_token, refresh_token = self.token_manager.get_token_pair(
+                    oauth_user.user_id
+                )
+                self._uow.oauth_users.add(oauth_user)
+                self._uow.commit()
+                return schemas.RespLogonOAuth(access_token=access_token,
+                                              refresh_token=refresh_token,
+                                              message='user created')
 
 
 class UserLogoutApi(MethodView):
@@ -260,8 +326,11 @@ class UserHistoryApi(MethodView):
         tags=[TAG + "History"]
     )
     def get(self, query: schemas.ReqHistory):
+        if query.user_id and (query.user_id != g.current_user.id and g.current_user.role != enums.UserRole.ADMIN):
+            abort(http.HTTPStatus.UNAUTHORIZED)
+        user_id, before, after = query.user_id if query.user_id else g.current_user.id, query.before, query.after
         with self._uow:
-            rows = self._uow.login_history.fetch_by(query, user_id=g.current_user.user_id)
+            rows = self._uow.login_history.fetch_by(user_id=user_id, before=before, after=after)
         return schemas.RespHistoryItems(items=rows)
 
 
@@ -421,5 +490,11 @@ bp.add_url_rule(
 bp.add_url_rule(
     "/login_history",
     view_func=UserHistoryApi.as_view("login_history"),
+    methods=["GET"]
+)
+
+bp.add_url_rule(
+    "/oauthvk",
+    view_func=UserOAuthVKApi.as_view("oauthvk"),
     methods=["GET"]
 )

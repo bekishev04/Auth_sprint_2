@@ -80,7 +80,7 @@ def create_app() -> Flask:
 
         g.version = version
         g.request_id = request_id
-
+        g.user_agent = 'stub'
         g.current_user = None
         h_access_token = request.headers.get("X-Auth-Token")
         if h_access_token:
