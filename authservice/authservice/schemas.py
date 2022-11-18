@@ -89,7 +89,6 @@ class ReqUserPasswordEdit(BaseModel):
 
     @validator("password")
     def passwords_match(cls, v, values):
-
         # совпадение паролей
         if "password_repeat" in values and v != values["password_repeat"]:
             raise ValueError("Passwords don't match")
@@ -165,3 +164,11 @@ class ReqHistory(BaseModel):
     user_id: uuid.UUID | None
     before: datetime.datetime | None
     after: datetime.datetime | None
+
+
+class ReqOAuthVK(BaseModel):
+    code: str
+
+
+class RespLogonOAuth(RespLogon, RespMessage):
+    ...
