@@ -72,7 +72,7 @@ class UserLoginApi(MethodView):
             with self._uow:
                 row = models.LoginHistory(
                     user_id=row.id,
-                    user_agent=json.user_agent
+                    user_agent=g.user_agent
                 )
 
                 self._uow.login_history.add(row)
