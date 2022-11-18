@@ -129,7 +129,10 @@ class ReqLogout(BaseModel):
     refresh_token: uuid.UUID
 
 
-class JWTPayload(ItemUser):
+class JWTPayload(BaseModelSchema):
+    login: str | None
+    full_name: str | None
+    role: str
     valid_through: datetime.datetime
 
 
