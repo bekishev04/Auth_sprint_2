@@ -89,7 +89,6 @@ class ReqUserPasswordEdit(BaseModel):
 
     @validator("password")
     def passwords_match(cls, v, values):
-
         # совпадение паролей
         if "password_repeat" in values and v != values["password_repeat"]:
             raise ValueError("Passwords don't match")
@@ -112,11 +111,6 @@ class ArgsUser(ArgsPaginate):
     login: str | None
 
 
-class ArgsHistory(ArgsPaginate):
-    before: datetime.datetime | None
-    after: datetime.datetime | None
-
-
 class ReqLogin(BaseModel):
     """Req for login"""
 
@@ -134,7 +128,10 @@ class ReqLogout(BaseModel):
     refresh_token: uuid.UUID
 
 
-class JWTPayload(ItemUser):
+class JWTPayload(BaseModelSchema):
+    login: str | None
+    full_name: str | None
+    role: str
     valid_through: datetime.datetime
 
 
@@ -164,5 +161,14 @@ class RespHistoryItems(BaseModel):
 
 
 class ReqHistory(BaseModel):
+    user_id: uuid.UUID | None
     before: datetime.datetime | None
     after: datetime.datetime | None
+
+
+class ReqOAuthVK(BaseModel):
+    code: str
+
+
+class RespLogonOAuth(RespLogon, RespMessage):
+    ...
