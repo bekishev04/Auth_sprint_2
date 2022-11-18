@@ -98,3 +98,14 @@ class LoginHistory(BaseModel):
 
     def __repr__(self):
         return f'<UserSignIn {self.user_id}:{self.logged_in_at}>'
+
+
+class OAuthAccounts(BaseModel):
+    __tablename__ = "oauth_accounts"
+    user_id = sa.Column(
+        UUID(as_uuid=True),
+        sa.ForeignKey("users.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    service_user_id = db.Column(db.Text)

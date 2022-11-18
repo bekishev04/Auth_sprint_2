@@ -9,6 +9,7 @@ class UnitOfWork:
     users: repo.UserRepository
     tokens: repo.TokenRepository
     login_history: repo.HistoryRepository
+    oauth_users: repo.OAuthAccountsRepository
 
     def __init__(self): ...
     def __enter__(self) -> UnitOfWork: ...
