@@ -39,9 +39,13 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_TTL: int = 60
 
     JAEGER_PORT: int
-    VK_APP_ID: int
+    VK_APP_ID: str
     VK_REDIRECT_URI: str
     VK_CLIENT_SECRET: str
+
+    YANDEX_APP_ID: str
+    YANDEX_REDIRECT_URI: str
+    YANDEX_CLIENT_SECRET: str
 
 
 cfg = Settings()
