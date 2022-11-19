@@ -3,9 +3,7 @@ import secrets
 import string
 import uuid
 
-import requests
-
-from authservice import schemas, cfg
+from authservice import schemas
 from authservice.database import models
 from flask import Blueprint, abort, g
 from spectree import Response
@@ -14,6 +12,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from authservice.entrypoints import enums
 from authservice.entrypoints.decorators import role_required, login_required
 from authservice.entrypoints.extensions import spec_tree
+from authservice.utils.oauth_utils import get_provider
 from ._init import MethodView
 
 bp = Blueprint("user", __name__, url_prefix="/user")
@@ -88,28 +87,21 @@ class UserLoginApi(MethodView):
             abort(http.HTTPStatus.UNAUTHORIZED)
 
 
-class UserOAuthVKApi(MethodView):
+class UserOAuthApi(MethodView):
 
     @spec_tree.validate(
         resp=Response("HTTP_400", "HTTP_401", HTTP_200=schemas.RespLogonOAuth),
         tags=[TAG + "UsersOAuthVK"],
     )
-    def get(self, query: schemas.ReqOAuthVK):
-        if not query.code:
+    def get(self, query: schemas.ReqOAuth):
+        provider = get_provider(query.service_provider)
+        access_token = provider.authorize(query.code)
+        if not access_token:
             abort(http.HTTPStatus.BAD_REQUEST)
-        link = 'https://oauth.vk.com/access_token'
-        params = {'client_id': cfg.VK_APP_ID,
-                  'client_secret': cfg.VK_CLIENT_SECRET,
-                  'redirect_uri': cfg.VK_REDIRECT_URI,
-                  'code': query.code}
-        resp = requests.get(link, params=params)
-        json = resp.json()
-        if json.get('error', None):
-            abort(http.HTTPStatus.BAD_REQUEST)
-        vk_user_id = str(json.get('user_id', None))
-        user_email = json.get('email', None)
+        user_info = provider.get_user_data(access_token)
+
         with self._uow:
-            remote_user = self._uow.oauth_users.get_by(remote_user_id=vk_user_id)
+            remote_user = self._uow.oauth_users.get_by(remote_user_id=user_info.user_id)
             if remote_user:
                 access_token, refresh_token = self.token_manager.get_token_pair(
                     remote_user.user_id
@@ -129,7 +121,7 @@ class UserOAuthVKApi(MethodView):
                 alphabet = string.ascii_letters + string.digits
                 random_password = ''.join(secrets.choice(alphabet) for _ in range(20))
                 row = models.User(
-                    login=user_email,
+                    login=user_info.login,
                     role=enums.UserRole.USER,
                     password=generate_password_hash(random_password)
                 )
@@ -137,7 +129,8 @@ class UserOAuthVKApi(MethodView):
                 self._uow.commit()
                 oauth_user = models.OAuthAccounts(
                     user_id=row.id,
-                    service_user_id=vk_user_id
+                    service_user_id=user_info.user_id,
+                    service_name=query.service_provider
                 )
 
                 access_token, refresh_token = self.token_manager.get_token_pair(
@@ -494,7 +487,7 @@ bp.add_url_rule(
 )
 
 bp.add_url_rule(
-    "/oauthvk",
-    view_func=UserOAuthVKApi.as_view("oauthvk"),
+    "/oauth",
+    view_func=UserOAuthApi.as_view("oauth"),
     methods=["GET"]
 )
