@@ -67,8 +67,9 @@ def init_extensions(app: Flask) -> Flask:
     spec_tree.register(app)
 
     # jaeger
-    configure_tracer()
-    FlaskInstrumentor().instrument_app(app)
+    if cfg.ENABLE_TRACER:
+        configure_tracer()
+        FlaskInstrumentor().instrument_app(app)
 
     return app
 
