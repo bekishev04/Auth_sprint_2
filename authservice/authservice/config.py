@@ -38,7 +38,15 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_TTL: int = 20160  # two weeks
     ACCESS_TOKEN_TTL: int = 60
 
+    # JAEGER tracer
     JAEGER_PORT: int
+    JAEGER_HOST: str = "localhost"
+    ENABLE_TRACER: bool = False
+    TRACER_SERVICE_NAME: str
+
+    VK_APP_ID: int
+    VK_REDIRECT_URI: str
+    VK_CLIENT_SECRET: str
     VK_APP_ID: str
     VK_REDIRECT_URI: str
     VK_CLIENT_SECRET: str
