@@ -3,6 +3,7 @@ import abc
 import requests
 
 import authservice.schemas as schemas
+import authservice.entrypoints.enums as enums
 from authservice import cfg
 
 
@@ -82,7 +83,7 @@ class ProviderYandex(AbstractProvider):
         return schema
 
 
-def get_provider(provider: str):
-    providers = {'vk': ProviderVK(),
-                 'yandex': ProviderYandex()}
-    return providers.get(provider.lower(), None)
+def get_provider(provider: enums.ServiceProvider):
+    providers = {enums.ServiceProvider.VK: ProviderVK(),
+                 enums.ServiceProvider.YANDEX: ProviderYandex()}
+    return providers.get(provider, None)

@@ -168,7 +168,7 @@ class ReqHistory(BaseModel):
 
 class ReqOAuth(BaseModel):
     code: str
-    service_provider: str
+    service_provider: enums.ServiceProvider
 
 
 class RespLogonOAuth(RespLogon, RespMessage):

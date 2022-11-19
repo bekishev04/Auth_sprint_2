@@ -28,3 +28,8 @@ class UserRole(StrEnum):
 
     ADMIN = "admin", "Администратор"
     USER = "user", "Пользователь"
+
+
+class ServiceProvider(enum.Enum):
+    VK = "vk"
+    YANDEX = "yandex"
