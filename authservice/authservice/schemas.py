@@ -166,9 +166,15 @@ class ReqHistory(BaseModel):
     after: datetime.datetime | None
 
 
-class ReqOAuthVK(BaseModel):
+class ReqOAuth(BaseModel):
     code: str
+    service_provider: enums.ServiceProvider
 
 
 class RespLogonOAuth(RespLogon, RespMessage):
     ...
+
+
+class OAuthUser(BaseModel):
+    login: str | None
+    user_id: str

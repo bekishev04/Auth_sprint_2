@@ -109,3 +109,4 @@ class OAuthAccounts(BaseModel):
         nullable=False,
     )
     service_user_id = db.Column(db.Text)
+    service_name = db.Column(db.Text)
