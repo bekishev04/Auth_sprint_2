@@ -47,6 +47,13 @@ class Settings(BaseSettings):
     VK_APP_ID: int
     VK_REDIRECT_URI: str
     VK_CLIENT_SECRET: str
+    VK_APP_ID: str
+    VK_REDIRECT_URI: str
+    VK_CLIENT_SECRET: str
+
+    YANDEX_APP_ID: str
+    YANDEX_REDIRECT_URI: str
+    YANDEX_CLIENT_SECRET: str
 
 
 cfg = Settings()
